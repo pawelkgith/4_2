@@ -2,6 +2,7 @@
 
 const express = require("express");
 const app = express();
+app.use(express.json());
 
 let categories = ["funnyJoke", "lameJoke"];
 
@@ -53,6 +54,29 @@ app.get("/jokebook/joke/:category", (req, res) => {
 
   const randomIndex = Math.floor(Math.random() * selectedJokes.length);
   res.json({ jokes: selectedJokes[randomIndex] });
+});
+
+app.post("/jokebook/joke/:category", (req, res) => {
+  const category = req.params.category;
+  const { joke, response } = req.body;
+
+  if (!categories.includes(category)) {
+    return res.status(404).json({ error: `no jokes for category ${category}` });
+  }
+
+  if (!joke || !response) {
+    return res
+      .status(400)
+      .json({ error: "both joke and response fields are required" });
+  }
+
+  const newJoke = { joke, response };
+  jokesData[category].push(newJoke);
+
+  res.status(201).json({
+    message: `Dodano zart do kategorii ${category}`,
+    joke: newJoke,
+  });
 });
 
 const PORT = process.env.PORT || 3000;
